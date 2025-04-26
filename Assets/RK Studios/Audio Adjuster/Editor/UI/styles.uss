@@ -1,0 +1,277 @@
+/*
+    Layout
+*/
+
+.width {
+    width: 100%;
+    padding: 12px;
+    margin: 0 auto;
+}
+
+.body {
+    flex: 1;
+}
+
+/*
+    Header
+*/
+
+.header {
+    height: 60px;
+    background-color: #0c0c0c;
+    justify-content: center;
+}
+
+.header__flex {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header__logo {
+    -unity-font-style: bold;
+    color: #ffffff;
+    font-size: 18px;
+}
+
+.header__nav {
+    flex-direction: row;
+    align-items: center;
+}
+
+.header__nav Label {
+    margin-left: 24px;
+    font-size: 14px;
+}
+
+
+.header__refresh {
+    width: 28px;
+    height: 28px;
+    background-size: 16px;
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/refresh.png");
+}
+
+/*
+    Empty
+*/
+
+.empty {
+    -unity-text-align: middle-center;
+    padding: 60px 0;
+    flex: 1;
+}
+
+.empty--hidden {
+    display: none;
+}
+
+.empty__heading {
+    -unity-font-style: bold;
+    font-size: 16px;
+}
+
+.empty__body {
+    margin: 10px auto 0;
+    white-space: normal;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.empty--sfx .empty__body {
+    width: 360px;
+}
+
+.empty--bin .empty__body {
+    width: 480px;
+}
+
+.empty__button {
+    width: 120px;
+    height: 40px;
+    background-color: #0c0c0c;
+    color: #ffffff;
+    align-items: center;
+    justify-content: center;
+    -unity-font-style: bold;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    margin: 16px auto 0;
+}
+
+/*
+    Rows
+*/
+
+.row {
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.row-top {
+    flex-direction: row;
+    margin-bottom: 8px;
+    margin-right: -2px;
+}
+
+.row-top__bar {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.2);
+    height: 50px;
+    margin-right: 1px;
+    justify-content: flex-end;
+}
+
+.row-top__bar-inner {
+    background-color: rgba(255, 255, 255, 0.15);
+    height: 50%;
+}
+
+.row-bottom {
+    flex-direction: row;
+    align-items: center;
+}
+
+.row-bottom__cell {
+    margin-right: 10px;
+}
+
+.row-bottom__cell--hidden {
+    display: none;
+}
+
+.row-bottom__cell--small {
+    width: 60px;
+}
+
+.row-bottom__cell--medium {
+    width: 140px;
+}
+
+.row-bottom__cell--flex {
+    flex: 1;
+}
+
+.row-bottom__cell--no-space {
+    margin-right: 0;
+}
+
+.row-bottom__title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.row-bottom__time {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.row-bottom__button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    -unity-text-align: middle-center;
+    border-radius: 14px;
+    height: 28px;
+    -unity-font-style: bold;
+    font-size: 10px;
+    transition: 0.15s background-color;
+}
+
+.row-bottom__button:hover {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+
+.row-bottom__play {
+    width: 28px;
+    height: 28px;
+    background-size: 8px;
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/play.png");
+}
+
+.row-bottom__trim {
+    width: 28px;
+    height: 28px;
+    background-size: 12px;
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/trim.png");
+}
+
+.row-bottom__undo {
+    width: 28px;
+    height: 28px;
+    background-size: 13px;
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/revert.png");
+}
+
+
+.volume-adjustor {
+    background-color: rgba(0, 0, 0, 0.5);
+    height: 28px;
+    border-radius: 14px;
+    flex-direction: row;
+}
+
+.volume-adjustor__left,
+.volume-adjustor__right {
+    width: 32px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    transition: 0.15s background-color;
+
+}
+
+.volume-adjustor__left:hover,
+.volume-adjustor__right:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.volume-adjustor__left {
+    border-right-width: 1px;
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+    border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+.volume-adjustor__right {
+    border-left-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.1);
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+}
+
+.volume-adjustor__middle {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.volume-adjustor__plus,
+.volume-adjustor__minus,
+.volume-adjustor__volume {
+    width: 28px;
+    height: 28px;
+    background-size: 8px;
+}
+
+.volume-adjustor__minus {
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/minus.png");
+}
+
+.volume-adjustor__volume {
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/volume.png");
+    margin-right: -2px;
+    margin-left: -10px;
+}
+
+.volume-adjustor__plus {
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/plus.png");
+}
+
+.volume-adjustor__plus {
+    background-image: url("project://database/Assets/RK Studios/Audio Adjuster/Editor/Images/plus.png");
+}
+

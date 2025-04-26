@@ -1,0 +1,42 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <Style src="project://database/Assets/RK%20Studios/Audio%20Adjuster/Editor/UI/styles.uss?fileID=7433441132597879392&amp;guid=e0ad38774b44849a3a65ed7f650c16b4&amp;type=3#styles"/>
+
+    <ui:VisualElement class="header">
+        <ui:VisualElement class="width">
+            <ui:VisualElement class="header__flex">
+                <ui:Label text="Audio Adjuster" class="header__logo"/>
+                <ui:VisualElement class="header__refresh"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:ScrollView class="body">
+        <ui:VisualElement class="empty empty--sfx empty--hidden">
+            <ui:Label class="empty__heading" text="Nothing found"/>
+            <ui:Label
+                    class="empty__body"
+                    text="We were not able to find any sound files within your project. Add some and hit the refresh button."
+            />
+
+        </ui:VisualElement>
+
+        <ui:VisualElement class="empty empty--bin empty--hidden">
+            <ui:Label class="empty__heading" text="Missing FFmpeg"/>
+            <ui:Label
+                    class="empty__body"
+                    text="Download the FFMpeg executables using the button below and copy them into the Assets/RK Studios/Audio Adjustor/Editor/Bin folder"
+            />
+            <ui:VisualElement class="empty__button">
+                <ui:Label
+                        class="empty__button-text"
+                        text="Download"
+                />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="rows"/>
+    </ui:ScrollView>
+
+
+</ui:UXML>
