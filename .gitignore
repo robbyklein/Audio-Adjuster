@@ -76,4 +76,5 @@ crashlytics-build.properties
 Assets/SFX
 SFX.meta
 .DS_Store
-Assets/Bin/*
+Assets/RK Studios/Audio Adjuster/Editor/Bin/*
+Assets/RK Studios/Audio Adjuster/Editor/Bin

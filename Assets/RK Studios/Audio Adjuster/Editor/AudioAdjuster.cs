@@ -39,6 +39,11 @@ namespace RK_Studios.Audio_Adjuster.Editor {
 
             _refresh.RegisterCallback<ClickEvent>(_ => Refresh());
 
+            var downloadButton = _emptyBin.Q(className: "empty__button");
+            if (downloadButton != null) {
+                downloadButton.RegisterCallback<ClickEvent>(_ => OpenDownloadPage());
+            }
+
             Refresh();
         }
 
@@ -210,6 +215,10 @@ namespace RK_Studios.Audio_Adjuster.Editor {
             }
 
             return wf;
+        }
+
+        private void OpenDownloadPage() {
+            Application.OpenURL("https://github.com/robbyklein/Audio-Adjuster/releases");
         }
     }
 }
