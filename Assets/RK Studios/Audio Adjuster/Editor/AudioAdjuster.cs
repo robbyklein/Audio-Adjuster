@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using RK_Studios.Audio_Adjuster.Editor.Utilities;
@@ -38,11 +39,9 @@ namespace RK_Studios.Audio_Adjuster.Editor {
             _emptyBin = rootVisualElement.Q(className: "empty--bin");
 
             _refresh.RegisterCallback<ClickEvent>(_ => Refresh());
-
-            var downloadButton = _emptyBin.Q(className: "empty__button");
-            if (downloadButton != null) {
-                downloadButton.RegisterCallback<ClickEvent>(_ => OpenDownloadPage());
-            }
+            _emptyBin.Q(className: "empty__button")
+                ?.RegisterCallback<ClickEvent>(_ => Application.OpenURL(
+                    "https://github.com/robbyklein/Audio-Adjuster/releases"));
 
             Refresh();
         }
@@ -66,10 +65,10 @@ namespace RK_Studios.Audio_Adjuster.Editor {
         }
 
         private bool HasFFmpegBinary() {
-            var binPath = Path.Combine(Application.dataPath, "RK Studios/Audio Adjuster/Editor/Bin");
-            return File.Exists(Path.Combine(binPath, "ffmpeg-macos"))
-                   || File.Exists(Path.Combine(binPath, "ffmpeg-win.exe"))
-                   || File.Exists(Path.Combine(binPath, "ffmpeg-linux"));
+            var bin = Path.Combine(Application.dataPath, "RK Studios/Audio Adjuster/Editor/Bin");
+            return File.Exists(Path.Combine(bin, "ffmpeg-macos"))
+                   || File.Exists(Path.Combine(bin, "ffmpeg-win.exe"))
+                   || File.Exists(Path.Combine(bin, "ffmpeg-linux"));
         }
 
         private void ShowMissingBin() {
@@ -89,16 +88,17 @@ namespace RK_Studios.Audio_Adjuster.Editor {
         }
 
         private void LoadAudioFiles() {
-            var guids = AssetDatabase.FindAssets("t:AudioClip");
-            var map = new Dictionary<string, string>();
+            var map = Application.platform == RuntimePlatform.WindowsEditor
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>();
 
-            foreach (var g in guids) {
-                var p = AssetDatabase.GUIDToAssetPath(g);
+            foreach (var guid in AssetDatabase.FindAssets("t:AudioClip")) {
+                var p = AssetDatabase.GUIDToAssetPath(guid).Replace("\\", "/");
                 if (p.StartsWith("Assets/RK Studios/Audio Adjuster")) {
                     continue;
                 }
 
-                var dir = Path.GetDirectoryName(p);
+                var dir = Path.GetDirectoryName(p)?.Replace("\\", "/");
                 var fn = Path.GetFileNameWithoutExtension(p);
                 var isEd = fn.EndsWith("_edited");
                 var baseName = isEd ? fn[..^7] : fn;
@@ -108,10 +108,10 @@ namespace RK_Studios.Audio_Adjuster.Editor {
                 }
             }
 
-            foreach (var p in map.Values) {
-                var c = AssetDatabase.LoadAssetAtPath<AudioClip>(p);
-                if (c) {
-                    _audioFiles.Add(c);
+            foreach (var path in map.Values) {
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                if (clip) {
+                    _audioFiles.Add(clip);
                 }
             }
         }
@@ -120,6 +120,7 @@ namespace RK_Studios.Audio_Adjuster.Editor {
             foreach (var clip in _audioFiles) {
                 var assetPath = AssetDatabase.GetAssetPath(clip);
                 var (isTrimmed, vol) = AudioFileMetadata.ReadMetadata(assetPath);
+
                 var row = UIBuilders.Row(clip, ExtractWaveformData(clip, GraphSegments));
                 _rows.Add(row);
 
@@ -161,47 +162,49 @@ namespace RK_Studios.Audio_Adjuster.Editor {
             }
         }
 
-        private string SrcOf(string path) {
-            var d = Path.GetDirectoryName(path);
-            var n = Path.GetFileNameWithoutExtension(path);
-            var e = Path.GetExtension(path);
-            if (n.EndsWith("_edited")) {
-                n = n[..^7];
-            }
-
-            return Path.Combine(d ?? "", n + e).Replace("\\", "/");
-        }
-
-        private void Reprocess(string assetPath, bool trim, float v) {
-            var newAsset = FFmpegUtility.ProcessAudio(SrcOf(assetPath), trim, v);
+        private void Reprocess(string assetPath, bool trim, float vol) {
+            var src = SrcOf(assetPath);
+            var newAsset = FFmpegUtility.ProcessAudio(src, trim, vol);
             if (!string.IsNullOrEmpty(newAsset)) {
                 AssetDatabase.ImportAsset(newAsset);
                 Refresh();
             }
         }
 
-        private static void ToggleHidden(VisualElement cell, bool hide) {
-            if (cell == null) {
+        private static string SrcOf(string path) {
+            var dir = Path.GetDirectoryName(path)?.Replace("\\", "/");
+            var n = Path.GetFileNameWithoutExtension(path);
+            var e = Path.GetExtension(path);
+            if (n.EndsWith("_edited")) {
+                n = n[..^7];
+            }
+
+            return $"{dir}/{n}{e}".Replace("\\", "/");
+        }
+
+        private static void ToggleHidden(VisualElement ve, bool hide) {
+            if (ve == null) {
                 return;
             }
 
             if (hide) {
-                cell.AddToClassList(UIBuilders.BottomCellHiddenClass);
+                ve.AddToClassList(UIBuilders.BottomCellHiddenClass);
             }
             else {
-                cell.RemoveFromClassList(UIBuilders.BottomCellHiddenClass);
+                ve.RemoveFromClassList(UIBuilders.BottomCellHiddenClass);
             }
         }
 
-        private List<float> ExtractWaveformData(AudioClip clip, int resolution) {
+        private static List<float> ExtractWaveformData(AudioClip clip, int resolution) {
             var samples = new float[clip.samples];
             clip.GetData(samples, 0);
-            var wf = new List<float>();
             var seg = clip.samples / resolution;
+            var wf = new List<float>();
 
             for (var i = 0; i < resolution; i++) {
                 var sum = 0f;
-                int s = i * seg, e = Mathf.Min(s + seg, samples.Length);
+                var s = i * seg;
+                var e = Mathf.Min(s + seg, samples.Length);
                 for (var j = s; j < e; j++) {
                     sum += Mathf.Abs(samples[j]);
                 }
@@ -215,10 +218,6 @@ namespace RK_Studios.Audio_Adjuster.Editor {
             }
 
             return wf;
-        }
-
-        private void OpenDownloadPage() {
-            Application.OpenURL("https://github.com/robbyklein/Audio-Adjuster/releases");
         }
     }
 }

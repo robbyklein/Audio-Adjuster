@@ -6,27 +6,26 @@ using System.Text;
 using TagLib;
 using TagLib.Id3v2;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using File = System.IO.File;
 using Tag = TagLib.Id3v2.Tag;
 
 namespace RK_Studios.Audio_Adjuster.Editor.Utilities {
     public static class AudioFileMetadata {
-        private static readonly Dictionary<string, (bool trimmed, float vol)> Cache = new();
+        private static readonly Dictionary<string, (bool trimmed, float vol)>
+            Cache = new(StringComparer.OrdinalIgnoreCase);
 
         public static (bool trimmed, float volume) ReadMetadata(string assetPath) {
-            if (Cache.TryGetValue(assetPath, out var cached)) {
+            var key = assetPath.Replace("\\", "/");
+            if (Cache.TryGetValue(key, out var cached)) {
                 return cached;
             }
 
-            var full = Path.Combine(Application.dataPath, assetPath.Replace("Assets/", ""));
+            var full = Path.Combine(Application.dataPath, key[7..]);
             if (!File.Exists(full)) {
-                Debug.LogWarning($"[Meta] file not found: {full}");
                 return (false, 1f);
             }
 
             string aggregated = null;
-
             try {
                 using var tf = TagLib.File.Create(full);
 
@@ -64,36 +63,60 @@ namespace RK_Studios.Audio_Adjuster.Editor.Utilities {
                 aggregated = sb.ToString().TrimEnd('|');
             }
             catch (Exception ex) {
-                Debug.LogError($"[Meta] TagLib exception: {ex}");
+                Debug.LogError($"[Meta] {ex}");
             }
 
-            var trimmed = aggregated?.IndexOf("Trimmed:true", StringComparison.OrdinalIgnoreCase) >= 0;
+            var trimmed = aggregated?.IndexOf("Trimmed:true",
+                StringComparison.OrdinalIgnoreCase) >= 0;
 
             var vol = 1f;
-            var idx = aggregated?.IndexOf("Volume:", StringComparison.OrdinalIgnoreCase) ?? -1;
+            var idx = aggregated?.IndexOf("Volume:",
+                StringComparison.OrdinalIgnoreCase) ?? -1;
             if (idx >= 0) {
                 var slice = aggregated.Substring(idx + 7)
                     .Split('|', ';', '\n', '\r', '\0')[0]
                     .Trim()
                     .Replace(',', '.');
 
-                if (!float.TryParse(slice, NumberStyles.Float, CultureInfo.InvariantCulture, out vol)) {
+                if (!float.TryParse(slice, NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out vol)) {
                     vol = 1f;
                 }
 
                 vol = Mathf.Clamp(vol, 0f, 3f);
             }
 
-            Cache[assetPath] = (trimmed, vol);
+            Cache[key] = (trimmed, vol);
             return (trimmed, vol);
         }
 
-
         public static void ClearCache(string path) {
-            var key = path.StartsWith("Assets/")
-                ? path
-                : "Assets/" + path.Replace(Application.dataPath + Path.DirectorySeparatorChar, "").Replace("\\", "/");
-            Cache.Remove(key);
+            string NormalizeToAssetPath(string p) {
+                p = Path.GetFullPath(p).Replace("\\", "/");
+                if (p.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase)) {
+                    return p;
+                }
+
+                var root = Application.dataPath.Replace("\\", "/");
+                if (!p.StartsWith(root, StringComparison.OrdinalIgnoreCase)) {
+                    return null;
+                }
+
+                var rel = p.Substring(root.Length).TrimStart('/');
+                return "Assets/" + rel;
+            }
+
+            var main = NormalizeToAssetPath(path);
+            if (main == null) {
+                return;
+            }
+
+            Cache.Remove(main);
+
+            if (main.EndsWith("_edited.wav", StringComparison.OrdinalIgnoreCase)) {
+                var unedited = main[..^11] + ".wav";
+                Cache.Remove(unedited);
+            }
         }
     }
 }
